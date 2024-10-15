@@ -9,6 +9,7 @@ const host = "127.0.0.1";
 
 server.on("connection", (socket) => {
     socket.on("data", (data) => {
+        logger.info(`Data from client is ${data}`)
         let res;
         try {
             const { command, args } = parseCommand(data);
