@@ -34,6 +34,9 @@ func addSETHandler() {
 		if len(args) < 2 {
 			return "-ERR wrong number of arguments for 'set' command\r\n"
 		}
+		if len(args) > 2 {
+			return "-ERR syntax error\r\n"
+		}
 		key := args[0]
 		value := args[1]
 		dataStore[key] = valueFormat{
@@ -102,14 +105,16 @@ func addDELHandler() {
 		if len(args) < 1 {
 			return "-ERR wrong number of arguments for 'del' command\r\n"
 		}
-		key := args[0]
-		if _, ok := dataStore[key]; !ok {
-			return ":0\r\n"
-		} else {
-			delete(dataStore, key)
-			delete(keyExpirations, key)
-			return ":1\r\n"
+		for _, key := range args {
+			if _, ok := dataStore[key]; !ok {
+				return ":0\r\n"
+			} else {
+				delete(dataStore, key)
+				delete(keyExpirations, key)
+				return ":1\r\n"
+			}
 		}
+		return ":1\r\n"
 	}
 	handlers["DEL"] = deleteHandler
 }
