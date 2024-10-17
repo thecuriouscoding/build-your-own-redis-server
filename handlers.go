@@ -91,7 +91,10 @@ func addEXPIREHandler() {
 			return ":0\r\n"
 		} else {
 			// check in redis actual server for invalid value type i.e. not number, what error it gives
-			expirationTime, _ := strconv.Atoi(value)
+			expirationTime, err := strconv.Atoi(value)
+			if err != nil {
+				return ":0\r\n"
+			}
 			keyExpirations[key] = time.Now().Add(time.Duration(expirationTime) * time.Second)
 		}
 		return ":1\r\n"
