@@ -27,17 +27,16 @@ func handleConnection(conn net.Conn) {
 		if isCompleteRedisCommand(buffer.Bytes()) {
 			log.Println("Whole command is: ", buffer.String())
 			// Process the command
-			command, args, err := processCommand(buffer.Bytes())
+			response := processCommand(buffer.Bytes())
+			log.Println("response to send is: ", response)
+			log.Println("is response -ERR unknown command", response == "-ERR unknown command\r\n")
 			// Clear the buffer for the next command
 			buffer.Reset()
-			if err != nil {
-				conn.Write([]byte("-ERR unknown command\r\n"))
-			}
-			log.Println("command is: ", command)
-			log.Println("args are: ", args)
-			conn.Write([]byte("+OK\r\n"))
-		} else {
-			log.Println("Incomplete command is: ", buffer.String())
+			conn.Write([]byte(response))
+			// conn.Write([]byte("-ERR unknown command\r\n"))
 		}
+		// else {
+		// 	log.Println("Incomplete command is: ", buffer.String())
+		// }
 	}
 }
