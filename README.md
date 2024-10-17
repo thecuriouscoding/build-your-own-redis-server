@@ -1,6 +1,9 @@
 # PART 1
 This branch pertains to the handling of SET, GET, DEL, EXPIRE Commands. In-memory store has been used.
 
+# How to run
+1. You can run ```go run .``` and then connect to server via redis-cli and try performing SET, GET, DEL and EXPIRE commands.
+
 # RESP
 
 Redis uses a text based protocol known as the RESP (Redis Serialization Protocol). Major points are:
