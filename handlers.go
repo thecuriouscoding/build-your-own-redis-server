@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 )
@@ -14,14 +13,11 @@ type valueFormat struct {
 
 var dataStore = make(map[string]valueFormat)
 
-type commandHandler func(args []string) string
-
-var handlers = make(map[string]commandHandler)
+var handlers = make(map[string]func(args []string) string)
 
 var keyExpirations = make(map[string]time.Time)
 
 func checkKeyExpiration(key string) bool {
-	log.Println("Key expiration value is: ", keyExpirations[key])
 	if val, ok := keyExpirations[key]; !ok {
 		return false
 	} else {
@@ -34,9 +30,7 @@ func checkKeyExpiration(key string) bool {
 }
 
 func addSETHandler() {
-	// var setHandler commandHandler
 	setHandler := func(args []string) string {
-		log.Println("SET handler called with args: ", args)
 		if len(args) < 2 {
 			return "-ERR wrong number of arguments for 'set' command\r\n"
 		}
@@ -46,7 +40,6 @@ func addSETHandler() {
 			valueType: "string",
 			value:     value,
 		}
-		log.Println("Data store updated to: ", dataStore)
 		return "+OK\r\n"
 	}
 	handlers["SET"] = setHandler
@@ -54,12 +47,10 @@ func addSETHandler() {
 
 func addGETHandler() {
 	getHandler := func(args []string) string {
-		log.Println("GET handler called with args: ", args)
 		if len(args) < 1 {
 			return "-ERR wrong number of arguments for 'get' command\r\n"
 		}
 		key := args[0]
-		log.Println("Data store key value to to args is: ", dataStore[key])
 		if val, ok := dataStore[key]; !ok {
 			return "$-1\r\n"
 		} else {
@@ -67,7 +58,6 @@ func addGETHandler() {
 				return "$-1\r\n"
 			}
 			isExpired := checkKeyExpiration(key)
-			log.Println("Is key expired: ", isExpired)
 			if isExpired {
 				delete(dataStore, key)
 				delete(keyExpirations, key)
@@ -81,7 +71,6 @@ func addGETHandler() {
 
 func addEXPIREHandler() {
 	expireHandler := func(args []string) string {
-		log.Println("EXPIRE handler called with args: ", args)
 		if len(args) < 1 {
 			return "-ERR wrong number of arguments for 'expire' command\r\n"
 		}
@@ -90,7 +79,6 @@ func addEXPIREHandler() {
 		if _, ok := dataStore[key]; !ok {
 			return ":0\r\n"
 		} else {
-			// check in redis actual server for invalid value type i.e. not number, what error it gives
 			expirationTime, _ := strconv.Atoi(value)
 			keyExpirations[key] = time.Now().Add(time.Duration(expirationTime) * time.Second)
 		}
@@ -108,7 +96,6 @@ func addCOMMANDHandler() {
 
 func addDELHandler() {
 	deleteHandler := func(args []string) string {
-		log.Println("DEL handler called with args: ", args)
 		if len(args) < 1 {
 			return "-ERR wrong number of arguments for 'del' command\r\n"
 		}

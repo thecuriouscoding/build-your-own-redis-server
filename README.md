@@ -1,3 +1,6 @@
+# PART 1
+This branch pertains to the handling of SET, GET, DEL, EXPIRE Commands. In-memory store has been used.
+
 # RESP
 
 Redis uses a text based protocol known as the RESP (Redis Serialization Protocol). Major points are:

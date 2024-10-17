@@ -9,8 +9,8 @@ import (
 )
 
 func handleConnection(conn net.Conn) {
-	userId := rand.Intn(900000) + 100000
-	log.Println("Client connected with id: ", userId)
+	clientID := rand.Intn(900000) + 100000
+	log.Println("Client connected with id: ", clientID)
 	defer conn.Close()
 	reader := bufio.NewReader(conn)
 	var buffer bytes.Buffer
@@ -25,18 +25,11 @@ func handleConnection(conn net.Conn) {
 		buffer.Write(data)
 		// Check if we have a complete Redis command
 		if isCompleteRedisCommand(buffer.Bytes()) {
-			log.Println("Whole command is: ", buffer.String())
 			// Process the command
 			response := processCommand(buffer.Bytes())
-			log.Println("response to send is: ", response)
-			log.Println("is response -ERR unknown command", response == "-ERR unknown command\r\n")
 			// Clear the buffer for the next command
 			buffer.Reset()
 			conn.Write([]byte(response))
-			// conn.Write([]byte("-ERR unknown command\r\n"))
 		}
-		// else {
-		// 	log.Println("Incomplete command is: ", buffer.String())
-		// }
 	}
 }
