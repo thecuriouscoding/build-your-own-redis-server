@@ -11,11 +11,11 @@ type valueFormat struct {
 	value     interface{}
 }
 
-var dataStore = make(map[string]valueFormat)
-
-var handlers = make(map[string]func(args []string) string)
-
-var keyExpirations = make(map[string]time.Time)
+var (
+	dataStore      = make(map[string]valueFormat)
+	handlers       = make(map[string]func(args []string) string)
+	keyExpirations = make(map[string]time.Time)
+)
 
 func checkKeyExpiration(key string) bool {
 	if val, ok := keyExpirations[key]; !ok {
@@ -109,6 +109,12 @@ func addDELHandler() {
 			if _, ok := dataStore[key]; !ok {
 				return ":0\r\n"
 			} else {
+				isExpired := checkKeyExpiration(key)
+				if isExpired {
+					delete(dataStore, key)
+					delete(keyExpirations, key)
+					return ":0\r\n"
+				}
 				delete(dataStore, key)
 				delete(keyExpirations, key)
 				return ":1\r\n"
@@ -119,10 +125,139 @@ func addDELHandler() {
 	handlers["DEL"] = deleteHandler
 }
 
+// ttl handler should check if the key is present in data store and should return whats the remaining seconds for its expiry
+func addTTLHandler() {
+	ttlHandler := func(args []string) string {
+		if len(args) != 1 {
+			return "-ERR wrong number of arguments for 'ttl' command\r\n"
+		}
+		key := args[0]
+		if _, ok := dataStore[key]; !ok {
+			return ":-2\r\n"
+		} else {
+			if expireVal, ok := keyExpirations[key]; !ok {
+				return ":-1\r\n"
+			} else {
+				remainingSeconds := time.Until(expireVal).Seconds()
+				if int(remainingSeconds) <= 0 {
+					delete(dataStore, key)
+					delete(keyExpirations, key)
+					return ":-2\r\n"
+				}
+				return fmt.Sprintf(":%d\r\n", int(remainingSeconds))
+			}
+		}
+	}
+	handlers["TTL"] = ttlHandler
+}
+
+// incr handler should increase the value of key if the value is in number format, if there is no key, a key should be created
+func addINCRHandler() {
+	incrHandler := func(args []string) string {
+		if len(args) != 1 {
+			return "-ERR wrong number of arguments for 'incr' command\r\n"
+		}
+		key := args[0]
+		if dsVal, ok := dataStore[key]; !ok {
+			handlers["SET"]([]string{key, "1"})
+			return ":1\r\n"
+		} else {
+			if dsVal.valueType != "string" {
+				return "-ERR WRONGTYPE Operation against a key holding the wrong kind of value\r\n"
+			}
+			if _, ok := keyExpirations[key]; !ok {
+				if intVal, err := strconv.Atoi(dsVal.value.(string)); err != nil {
+					return "-ERR value is not an integer or out of range\r\n"
+				} else {
+					newVal := intVal + 1
+					dataStore[key] = valueFormat{
+						valueType: "string",
+						value:     fmt.Sprintf("%d", newVal),
+					}
+					return fmt.Sprintf(":%d\r\n", newVal)
+				}
+			} else {
+				isKeyExpired := checkKeyExpiration(key)
+				if isKeyExpired {
+					delete(dataStore, key)
+					delete(keyExpirations, key)
+					handlers["SET"]([]string{key, "1"})
+					return ":1\r\n"
+				} else {
+					if intVal, err := strconv.Atoi(dsVal.value.(string)); err != nil {
+						return "-ERR value is not an integer or out of range\r\n"
+					} else {
+						newVal := intVal + 1
+						dataStore[key] = valueFormat{
+							valueType: "string",
+							value:     fmt.Sprintf("%d", newVal),
+						}
+						return fmt.Sprintf(":%d\r\n", newVal)
+					}
+				}
+			}
+		}
+	}
+	handlers["INCR"] = incrHandler
+}
+
+// decr handler should decrease the value of key if the value is in number format, if there is no key, a key should be created
+func addDECRHandler() {
+	decrHandler := func(args []string) string {
+		if len(args) != 1 {
+			return "-ERR wrong number of arguments for 'decr' command\r\n"
+		}
+		key := args[0]
+		if dsVal, ok := dataStore[key]; !ok {
+			handlers["SET"]([]string{key, "-1"})
+			return ":-1\r\n"
+		} else {
+			if dsVal.valueType != "string" {
+				return "-ERR WRONGTYPE Operation against a key holding the wrong kind of value\r\n"
+			}
+			if _, ok := keyExpirations[key]; !ok {
+				if intVal, err := strconv.Atoi(dsVal.value.(string)); err != nil {
+					return "-ERR value is not an integer or out of range\r\n"
+				} else {
+					newVal := intVal - 1
+					dataStore[key] = valueFormat{
+						valueType: "string",
+						value:     fmt.Sprintf("%d", newVal),
+					}
+					return fmt.Sprintf(":%d\r\n", newVal)
+				}
+			} else {
+				isKeyExpired := checkKeyExpiration(key)
+				if isKeyExpired {
+					delete(dataStore, key)
+					delete(keyExpirations, key)
+					handlers["SET"]([]string{key, "-1"})
+					return ":-1\r\n"
+				} else {
+					if intVal, err := strconv.Atoi(dsVal.value.(string)); err != nil {
+						return "-ERR value is not an integer or out of range\r\n"
+					} else {
+						newVal := intVal - 1
+						dataStore[key] = valueFormat{
+							valueType: "string",
+							value:     fmt.Sprintf("%d", newVal),
+						}
+						return fmt.Sprintf(":%d\r\n", newVal)
+					}
+				}
+			}
+		}
+	}
+	handlers["DECR"] = decrHandler
+}
+
 func addHandlers() {
 	addCOMMANDHandler()
 	addSETHandler()
 	addGETHandler()
 	addEXPIREHandler()
 	addDELHandler()
+	addTTLHandler()
+	addINCRHandler()
+	addDECRHandler()
 }
