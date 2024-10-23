@@ -8,7 +8,8 @@ import (
 const port = ":6379"
 
 func main() {
-	addHandlers()
+	addBasicHandlers()
+	addListHandlers()
 	// Start a TCP listener on port 6379
 	listener, err := net.Listen("tcp", port)
 	if err != nil {

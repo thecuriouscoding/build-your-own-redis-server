@@ -44,3 +44,12 @@ func isCompleteRedisCommand(data []byte) bool {
 	}
 	return false
 }
+
+// function will help in converting a string value into its int equivalent, if it errors, it will return the same
+func readIntValue(input string) (int, error) {
+	if intVal, err := strconv.Atoi(input); err != nil {
+		return 0, err
+	} else {
+		return intVal, nil
+	}
+}

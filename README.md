@@ -1,5 +1,5 @@
-# PART 2
-This branch pertains to the addition of handling of TTL, INCR, DECR Commands. In-memory store has been used.
+# PART 3
+This branch pertains to the addition of handling of List Related Commands i.e. LPUSH, RPUSH, LRANGE, LPOP and RPOP. In-memory store has been used.
 
 # How to run
 1. You can run ```go run .``` and then connect to server via redis-cli and try performing SET, GET, DEL and EXPIRE commands.
