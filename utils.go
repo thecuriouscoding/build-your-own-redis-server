@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"strconv"
+	"time"
 )
 
 // Helper function to remove empty lines
@@ -52,4 +53,26 @@ func readIntValue(input string) (int, error) {
 	} else {
 		return intVal, nil
 	}
+}
+
+// SetInterval will fire the passed function at every <interval> passed
+func SetInterval(interval time.Duration, task func()) {
+	stop := make(chan bool)
+	ticker := time.NewTicker(interval)
+
+	go func() {
+		for {
+			//TODO- chekc is it possible that we can wait if next tick is encountered and last tick hasnt succeeded/failed i.e. is in process
+			select {
+			case <-ticker.C:
+				task()
+			case <-stop:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
+
+	// return stop
+	// return
 }

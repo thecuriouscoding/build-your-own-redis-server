@@ -3,11 +3,16 @@ package main
 import (
 	"log"
 	"net"
+	"time"
 )
 
 const port = ":6379"
 
 func main() {
+	if err := loadLastSnapshot(); err != nil {
+		log.Fatal("Snapshot load failed: ", err)
+	}
+	SetInterval(5*time.Second, createSnapshot)
 	addBasicHandlers()
 	addListHandlers()
 	// Start a TCP listener on port 6379
