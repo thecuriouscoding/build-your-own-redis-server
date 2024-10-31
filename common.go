@@ -6,8 +6,8 @@ import (
 )
 
 type valueFormat struct {
-	valueType string
-	value     interface{}
+	ValueType string      `json:"value_type"`
+	Value     interface{} `json:"value"`
 }
 
 type argumentLengthCheck struct {

@@ -6,15 +6,15 @@ import (
 
 // Node represents an individual node in the doubly linked list
 type Node struct {
-	data string
-	prev *Node
-	next *Node
+	Data string `json:"Data"`
+	Prev *Node  `json:"-"`
+	Next *Node  `json:"-"`
 }
 
 type ListValue struct {
-	start  *Node
-	tail   *Node
-	length int
+	Start  *Node `json:"start"`
+	Tail   *Node `json:"tail"`
+	Length int   `json:"length"`
 }
 
 var (
@@ -33,27 +33,27 @@ func addElementsToList(elements []string, start *Node, tail *Node, pushOn string
 	for _, ele := range elements {
 		switch pushOn {
 		case PUSH_ON_LEFT:
-			if start.data == "" {
-				start.data = ele
-				tail.data = ele
+			if start.Data == "" {
+				start.Data = ele
+				tail.Data = ele
 			} else {
 				newListNode := Node{
-					data: ele,
+					Data: ele,
 				}
-				newListNode.next = start
-				start.prev = &newListNode
+				newListNode.Next = start
+				start.Prev = &newListNode
 				start = &newListNode
 			}
 		case PUSH_ON_RIGHT:
-			if start.data == "" {
-				start.data = ele
-				tail.data = ele
+			if start.Data == "" {
+				start.Data = ele
+				tail.Data = ele
 			} else {
 				newListNode := Node{
-					data: ele,
+					Data: ele,
 				}
-				newListNode.prev = tail
-				tail.next = &newListNode
+				newListNode.Prev = tail
+				tail.Next = &newListNode
 				tail = &newListNode
 			}
 		}
@@ -70,8 +70,8 @@ func removeElementsFromList(noOfElementsToRemove int, start *Node, tail *Node, p
 			if len(elementsRemoved) == noOfElementsToRemove {
 				break
 			}
-			elementsRemoved = append(elementsRemoved, start.data)
-			start = start.next
+			elementsRemoved = append(elementsRemoved, start.Data)
+			start = start.Next
 		}
 		if start == nil {
 			tail = nil
@@ -81,8 +81,8 @@ func removeElementsFromList(noOfElementsToRemove int, start *Node, tail *Node, p
 			if len(elementsRemoved) == noOfElementsToRemove {
 				break
 			}
-			elementsRemoved = append(elementsRemoved, tail.data)
-			tail = tail.prev
+			elementsRemoved = append(elementsRemoved, tail.Data)
+			tail = tail.Prev
 		}
 		if tail == nil {
 			start = nil
@@ -116,29 +116,29 @@ func addLPUSHHandler() {
 			tail := start
 			start, tail = addElementsToList(elements, start, tail, PUSH_ON_LEFT)
 			dataStore[key] = valueFormat{
-				valueType: VALUE_TYPE_LIST,
-				value: ListValue{
-					start:  start,
-					tail:   tail,
-					length: len(elements),
+				ValueType: VALUE_TYPE_LIST,
+				Value: ListValue{
+					Start:  start,
+					Tail:   tail,
+					Length: len(elements),
 				},
 			}
 			return fmt.Sprintf(":%d\r\n", len(elements))
 		} else {
-			if dsVal.valueType != VALUE_TYPE_LIST {
+			if dsVal.ValueType != VALUE_TYPE_LIST {
 				return getErrorMessage(ERR_WRONG_TYPE_OPERATION, COMMAND_LPUSH)
 			}
 			elements := args[1:]
 			totalElements := len(elements)
-			start := dsVal.value.(ListValue).start
-			tail := dsVal.value.(ListValue).tail
+			start := dsVal.Value.(ListValue).Start
+			tail := dsVal.Value.(ListValue).Tail
 			start, tail = addElementsToList(elements, start, tail, PUSH_ON_LEFT)
 			dataStore[key] = valueFormat{
-				valueType: VALUE_TYPE_LIST,
-				value: ListValue{
-					start:  start,
-					tail:   tail,
-					length: dsVal.value.(ListValue).length + totalElements,
+				ValueType: VALUE_TYPE_LIST,
+				Value: ListValue{
+					Start:  start,
+					Tail:   tail,
+					Length: dsVal.Value.(ListValue).Length + totalElements,
 				},
 			}
 			return fmt.Sprintf(":%d\r\n", totalElements)
@@ -180,22 +180,22 @@ func addLRANGEHandler() {
 		if dsVal, ok := dataStore[key]; !ok {
 			return "*0\r\n"
 		} else {
-			if dsVal.valueType != VALUE_TYPE_LIST {
+			if dsVal.ValueType != VALUE_TYPE_LIST {
 				return getErrorMessage(ERR_WRONG_TYPE_OPERATION, COMMAND_LRANGE)
 			}
 			if startIndex >= 0 && endIndex >= 0 {
 				if endIndex < startIndex {
 					return "*0\r\n"
 				}
-				if startIndex <= dsVal.value.(ListValue).length && endIndex >= startIndex {
+				if startIndex <= dsVal.Value.(ListValue).Length && endIndex >= startIndex {
 					tempStart := 0
 					responseElements := []string{}
-					listStart := dsVal.value.(ListValue).start
+					listStart := dsVal.Value.(ListValue).Start
 					for listStart != nil {
 						if tempStart >= startIndex && tempStart <= endIndex {
-							responseElements = append(responseElements, listStart.data)
+							responseElements = append(responseElements, listStart.Data)
 						}
-						listStart = listStart.next
+						listStart = listStart.Next
 						tempStart++
 					}
 					response := fmt.Sprintf("*%d\r\n", len(responseElements))
@@ -236,29 +236,29 @@ func addRPUSHHandler() {
 			tail := start
 			start, tail = addElementsToList(elements, start, tail, PUSH_ON_RIGHT)
 			dataStore[key] = valueFormat{
-				valueType: VALUE_TYPE_LIST,
-				value: ListValue{
-					start:  start,
-					tail:   tail,
-					length: len(elements),
+				ValueType: VALUE_TYPE_LIST,
+				Value: ListValue{
+					Start:  start,
+					Tail:   tail,
+					Length: len(elements),
 				},
 			}
 			return fmt.Sprintf(":%d\r\n", len(elements))
 		} else {
-			if dsVal.valueType != VALUE_TYPE_LIST {
+			if dsVal.ValueType != VALUE_TYPE_LIST {
 				return getErrorMessage(ERR_WRONG_TYPE_OPERATION, COMMAND_LPUSH)
 			}
 			elements := args[1:]
 			totalElements := len(elements)
-			start := dsVal.value.(ListValue).start
-			tail := dsVal.value.(ListValue).tail
+			start := dsVal.Value.(ListValue).Start
+			tail := dsVal.Value.(ListValue).Tail
 			start, tail = addElementsToList(elements, start, tail, PUSH_ON_RIGHT)
 			dataStore[key] = valueFormat{
-				valueType: VALUE_TYPE_LIST,
-				value: ListValue{
-					start:  start,
-					tail:   tail,
-					length: dsVal.value.(ListValue).length + totalElements,
+				ValueType: VALUE_TYPE_LIST,
+				Value: ListValue{
+					Start:  start,
+					Tail:   tail,
+					Length: dsVal.Value.(ListValue).Length + totalElements,
 				},
 			}
 			return fmt.Sprintf(":%d\r\n", totalElements)
@@ -289,7 +289,7 @@ func addLPOPHandler() {
 		if dsVal, ok := dataStore[key]; !ok {
 			return "$-1\r\n"
 		} else {
-			if dsVal.valueType != VALUE_TYPE_LIST {
+			if dsVal.ValueType != VALUE_TYPE_LIST {
 				return getErrorMessage(ERR_WRONG_TYPE_OPERATION, COMMAND_LPOP)
 			}
 			count := 1
@@ -303,16 +303,16 @@ func addLPOPHandler() {
 				}
 				count = _count
 			}
-			start := dsVal.value.(ListValue).start
-			tail := dsVal.value.(ListValue).tail
+			start := dsVal.Value.(ListValue).Start
+			tail := dsVal.Value.(ListValue).Tail
 			var elementsRemoved []string
 			start, tail, elementsRemoved = removeElementsFromList(count, start, tail, POP_FROM_LEFT)
 			dataStore[key] = valueFormat{
-				valueType: VALUE_TYPE_LIST,
-				value: ListValue{
-					start:  start,
-					tail:   tail,
-					length: dsVal.value.(ListValue).length - len(elementsRemoved),
+				ValueType: VALUE_TYPE_LIST,
+				Value: ListValue{
+					Start:  start,
+					Tail:   tail,
+					Length: dsVal.Value.(ListValue).Length - len(elementsRemoved),
 				},
 			}
 			response := fmt.Sprintf("*%d\r\n", len(elementsRemoved))
@@ -347,7 +347,7 @@ func addRPOPHandler() {
 		if dsVal, ok := dataStore[key]; !ok {
 			return "$-1\r\n"
 		} else {
-			if dsVal.valueType != VALUE_TYPE_LIST {
+			if dsVal.ValueType != VALUE_TYPE_LIST {
 				return getErrorMessage(ERR_WRONG_TYPE_OPERATION, COMMAND_RPOP)
 			}
 			count := 1
@@ -361,16 +361,16 @@ func addRPOPHandler() {
 				}
 				count = _count
 			}
-			start := dsVal.value.(ListValue).start
-			tail := dsVal.value.(ListValue).tail
+			start := dsVal.Value.(ListValue).Start
+			tail := dsVal.Value.(ListValue).Tail
 			var elementsRemoved []string
 			start, tail, elementsRemoved = removeElementsFromList(count, start, tail, POP_FROM_RIGHT)
 			dataStore[key] = valueFormat{
-				valueType: VALUE_TYPE_LIST,
-				value: ListValue{
-					start:  start,
-					tail:   tail,
-					length: dsVal.value.(ListValue).length - len(elementsRemoved),
+				ValueType: VALUE_TYPE_LIST,
+				Value: ListValue{
+					Start:  start,
+					Tail:   tail,
+					Length: dsVal.Value.(ListValue).Length - len(elementsRemoved),
 				},
 			}
 			response := fmt.Sprintf("*%d\r\n", len(elementsRemoved))

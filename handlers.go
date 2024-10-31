@@ -32,8 +32,8 @@ func addSETHandler() {
 		key := args[0]
 		value := args[1]
 		dataStore[key] = valueFormat{
-			valueType: VALUE_TYPE_STRING,
-			value:     value,
+			ValueType: VALUE_TYPE_STRING,
+			Value:     value,
 		}
 		return "+OK\r\n"
 	}
@@ -59,7 +59,7 @@ func addGETHandler() {
 		if val, ok := dataStore[key]; !ok {
 			return "$-1\r\n"
 		} else {
-			if val.valueType != VALUE_TYPE_STRING {
+			if val.ValueType != VALUE_TYPE_STRING {
 				return "$-1\r\n"
 			}
 			isExpired := checkKeyExpiration(key)
@@ -67,7 +67,7 @@ func addGETHandler() {
 				deleteExpiredKey(key)
 				return "$-1\r\n"
 			}
-			return fmt.Sprintf("$%d\r\n%s\r\n", len(val.value.(string)), val.value)
+			return fmt.Sprintf("$%d\r\n%s\r\n", len(val.Value.(string)), val.Value)
 		}
 	}
 	handlers["GET"] = getHandler
@@ -191,17 +191,17 @@ func addINCRHandler() {
 			handlers["SET"]([]string{key, "1"})
 			return ":1\r\n"
 		} else {
-			if dsVal.valueType != VALUE_TYPE_STRING {
+			if dsVal.ValueType != VALUE_TYPE_STRING {
 				return getErrorMessage(ERR_WRONG_TYPE_OPERATION, COMMAND_INCR)
 			}
 			if _, ok := keyExpirations[key]; !ok {
-				if intVal, err := strconv.Atoi(dsVal.value.(string)); err != nil {
+				if intVal, err := strconv.Atoi(dsVal.Value.(string)); err != nil {
 					return getErrorMessage(ERR_VALUE_NOT_INTEGER, COMMAND_INCR)
 				} else {
 					newVal := intVal + 1
 					dataStore[key] = valueFormat{
-						valueType: VALUE_TYPE_STRING,
-						value:     fmt.Sprintf("%d", newVal),
+						ValueType: VALUE_TYPE_STRING,
+						Value:     fmt.Sprintf("%d", newVal),
 					}
 					return fmt.Sprintf(":%d\r\n", newVal)
 				}
@@ -212,13 +212,13 @@ func addINCRHandler() {
 					handlers["SET"]([]string{key, "1"})
 					return ":1\r\n"
 				} else {
-					if intVal, err := strconv.Atoi(dsVal.value.(string)); err != nil {
+					if intVal, err := strconv.Atoi(dsVal.Value.(string)); err != nil {
 						return getErrorMessage(ERR_VALUE_NOT_INTEGER, COMMAND_INCR)
 					} else {
 						newVal := intVal + 1
 						dataStore[key] = valueFormat{
-							valueType: "string",
-							value:     fmt.Sprintf("%d", newVal),
+							ValueType: "string",
+							Value:     fmt.Sprintf("%d", newVal),
 						}
 						return fmt.Sprintf(":%d\r\n", newVal)
 					}
@@ -249,17 +249,17 @@ func addDECRHandler() {
 			handlers["SET"]([]string{key, "-1"})
 			return ":-1\r\n"
 		} else {
-			if dsVal.valueType != VALUE_TYPE_STRING {
+			if dsVal.ValueType != VALUE_TYPE_STRING {
 				return getErrorMessage(ERR_WRONG_TYPE_OPERATION, COMMAND_DECR)
 			}
 			if _, ok := keyExpirations[key]; !ok {
-				if intVal, err := strconv.Atoi(dsVal.value.(string)); err != nil {
+				if intVal, err := strconv.Atoi(dsVal.Value.(string)); err != nil {
 					return getErrorMessage(ERR_WRONG_TYPE_OPERATION, COMMAND_DECR)
 				} else {
 					newVal := intVal - 1
 					dataStore[key] = valueFormat{
-						valueType: VALUE_TYPE_STRING,
-						value:     fmt.Sprintf("%d", newVal),
+						ValueType: VALUE_TYPE_STRING,
+						Value:     fmt.Sprintf("%d", newVal),
 					}
 					return fmt.Sprintf(":%d\r\n", newVal)
 				}
@@ -270,13 +270,13 @@ func addDECRHandler() {
 					handlers["SET"]([]string{key, "-1"})
 					return ":-1\r\n"
 				} else {
-					if intVal, err := strconv.Atoi(dsVal.value.(string)); err != nil {
+					if intVal, err := strconv.Atoi(dsVal.Value.(string)); err != nil {
 						return getErrorMessage(ERR_WRONG_TYPE_OPERATION, COMMAND_DECR)
 					} else {
 						newVal := intVal - 1
 						dataStore[key] = valueFormat{
-							valueType: VALUE_TYPE_STRING,
-							value:     fmt.Sprintf("%d", newVal),
+							ValueType: VALUE_TYPE_STRING,
+							Value:     fmt.Sprintf("%d", newVal),
 						}
 						return fmt.Sprintf(":%d\r\n", newVal)
 					}
