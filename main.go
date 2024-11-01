@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net"
-	"time"
 )
 
 const port = ":6379"
@@ -15,7 +14,10 @@ func main() {
 		if err := loadLastSnapshot(); err != nil {
 			log.Fatal("Snapshot load failed: ", err)
 		}
-		SetInterval(5*time.Second, createSnapshot)
+		stop := SetInterval(flags.snapshotInterval, createSnapshot)
+		defer func() {
+			stop <- true
+		}()
 	} else {
 		log.Println("Persistence mode: inmemory")
 	}

@@ -56,13 +56,11 @@ func readIntValue(input string) (int, error) {
 }
 
 // SetInterval will fire the passed function at every <interval> passed
-func SetInterval(interval time.Duration, task func()) {
+func SetInterval(interval time.Duration, task func()) chan bool {
 	stop := make(chan bool)
 	ticker := time.NewTicker(interval)
-
 	go func() {
 		for {
-			//TODO- chekc is it possible that we can wait if next tick is encountered and last tick hasnt succeeded/failed i.e. is in process
 			select {
 			case <-ticker.C:
 				task()
@@ -72,7 +70,5 @@ func SetInterval(interval time.Duration, task func()) {
 			}
 		}
 	}()
-
-	// return stop
-	// return
+	return stop
 }
