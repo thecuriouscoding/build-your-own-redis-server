@@ -1,8 +1,8 @@
-# PART 5
-This branch pertains to the addition of "Append-only File" persistence mode which will enable the application to add all write related operations onto the logs file which will be used to replay and take system to the last running state once server restarts. Persistence mode by default is in-memory and flag `persistence` with value `snapshot`, `aof` or `inmemory` can be utilised to enable the applicable functionality.
+# About
+Repository to build your own redis-server. It contains various handlers, persistence modes like `snapshot`, `aof`, `inmemory`.
 
 # How to run
-You can run ```go run . -"persistence"=aof``` and then connect to server via redis-cli and try performing various commands.
+You can run ```go run .``` for inmemory persistence or ```go run . -"persistence"=snapshot -"snapshot-interval"=10s``` for snapshot persistence or ```go run . -"persistence"=aof``` for aof persistence mode. You can then connect to server via redis-cli and try performing various commands.
 
 # Command Usage
 1. SET - SET enables to push a key-value pair of string type onto the server.<br>
