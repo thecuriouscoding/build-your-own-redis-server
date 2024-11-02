@@ -8,21 +8,10 @@ import (
 const port = ":6379"
 
 func main() {
-	flags := getFlags()
-	if flags.persistence == "snapshot" {
-		log.Println("Persistence mode: snapshot")
-		if err := loadLastSnapshot(); err != nil {
-			log.Fatal("Snapshot load failed: ", err)
-		}
-		stop := SetInterval(flags.snapshotInterval, createSnapshot)
-		defer func() {
-			stop <- true
-		}()
-	} else {
-		log.Println("Persistence mode: inmemory")
-	}
 	addBasicHandlers()
 	addListHandlers()
+	flags := getFlags()
+	handlePersistence(flags)
 	// Start a TCP listener on port 6379
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
