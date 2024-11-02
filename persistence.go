@@ -41,19 +41,10 @@ func convertSnapshotFormatToList(values []string) ListValue {
 
 func loadLastSnapshot() error {
 	if _, err := os.Stat("snapshot.rdb"); os.IsNotExist(err) {
-		return createSnapshotFile()
+		return nil
 	} else {
 		return loadSnapshot("snapshot.rdb")
 	}
-}
-
-func createSnapshotFile() error {
-	file, err := os.Create("snapshot.rdb")
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	return nil
 }
 
 func loadSnapshot(filename string) error {
@@ -96,6 +87,7 @@ func loadSnapshot(filename string) error {
 			return fmt.Errorf("invalid snapshot format for key: %s", snapshot.Key)
 		}
 	}
+	log.Println("Snapshot loaded")
 	return nil
 }
 
