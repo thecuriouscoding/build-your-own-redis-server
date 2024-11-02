@@ -1,8 +1,8 @@
-# PART 4
-This branch pertains to the addition of "Snapshot" persistence mode which will enable the application to create a snapshot at every configured seconds. Persistence mode by default is in-memory and flag `persistence` with value `snapshot` or `inmemory` can be utilised to enable the applicable functionality. Flag `snapshot-interval` can be utilised to configure snapshot interval.
+# PART 5
+This branch pertains to the addition of "Append-only File" persistence mode which will enable the application to add all write related operations onto the logs file which will be used to replay and take system to the last running state once server restarts. Persistence mode by default is in-memory and flag `persistence` with value `snapshot`, `aof` or `inmemory` can be utilised to enable the applicable functionality.
 
 # How to run
-You can run ```go run . -"persistence"=snapshot -"snapshot-interval"=10s``` and then connect to server via redis-cli and try performing SET, GET, DEL and EXPIRE commands.
+You can run ```go run . -"persistence"=aof``` and then connect to server via redis-cli and try performing various commands.
 
 # Command Usage
 1. SET - SET enables to push a key-value pair of string type onto the server.<br>
@@ -13,25 +13,41 @@ You can run ```go run . -"persistence"=snapshot -"snapshot-interval"=10s``` and 
 
     ```GET [key]```
 
-3. LPUSH - LPUSH enables to insert elements on the left end of the list.<br>
+3. EXPIRE - EXPIRE enables putting an expiry/TTL to the keys stored on server.<br>
 
-    ```<𝘓𝘗𝘜𝘚𝘏 [𝘬𝘦𝘺] [𝘦𝘭𝘦𝘮𝘦𝘯𝘵𝘴...]>```
+    ```EXPIRE [key]```
 
-4. RPUSH - RPUSH enables to insert elements on the right end of the list.
+4. INCR - INCR enables incrementing number value keys by 1.<br>
 
-    ```<𝘙𝘗𝘜𝘚𝘏 [𝘬𝘦𝘺] [𝘦𝘭𝘦𝘮𝘦𝘯𝘵𝘴...]>```
+    ```INCR [key]```
 
-5. LRANGE - LRANGE enables to view the inserted elements of list.
+5. DECR - INCR enables decrementing number value keys by 1.<br>
 
-    ```<𝘓𝘙A𝘕𝘎𝘌 [𝘬𝘦𝘺] [𝘴𝘵𝘢𝘳𝘵] [𝘦𝘯𝘥]>```
+    ```DECR [key]```
 
-6. LPOP - LPOP will pop passed n number of elements from the left end of list
+6. TTL - TTL enables getting the left time to expire of a key.<br>
 
-    ```<𝘓𝘗𝘖𝘗 [𝘬𝘦𝘺] [𝘯𝘶𝘮𝘣𝘦𝘳]>```
+    ```TTL [key]```
 
-7. RPOP - RPOP will pop passed n number of elements from the right end of list.
+7. LPUSH - LPUSH enables to insert elements on the left end of the list.<br>
 
-    ```<𝘙𝘗𝘖𝘗 [𝘬𝘦𝘺] [𝘯𝘶𝘮𝘣𝘦𝘳]>```
+    ```LPUSH [key] [elements...]```
+
+8. RPUSH - RPUSH enables to insert elements on the right end of the list.
+
+    ```RPUSH [key] [elements...]```
+
+9. LRANGE - LRANGE enables to view the inserted elements of list.
+
+    ```LRANGE [key] [start] [end]```
+
+10. LPOP - LPOP will pop passed n number of elements from the left end of list
+
+    ```LPOP [key] [number]```
+
+11. RPOP - RPOP will pop passed n number of elements from the right end of list.
+
+    ```RPOP [key] [number]```
 
 # RESP
 
