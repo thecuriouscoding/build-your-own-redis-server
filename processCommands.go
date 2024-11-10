@@ -4,22 +4,19 @@ import (
 	"log"
 )
 
-func executeCommand(command string, args []string, aofReplay bool) string {
-	log.Println("executing command: ", command, " with args: ", args, " aof replay: ", aofReplay)
+func executeCommand(command string, args []string) string {
+	log.Println("executing command: ", command, " with args: ", args)
 	if handler, ok := handlers[command]; !ok {
 		return "-ERR unknown command\r\n"
 	} else {
-		if !aofReplay {
-			addToAOFLogs(command, args)
-		}
 		return handler(args)
 	}
 }
 
 func processCommand(data []byte) string {
-	command, args, err := getCommandAndArgs(data)
+	command, args, err := getCommandAndArgs(string(data))
 	if err != nil {
 		return "-ERR unknown command\r\n"
 	}
-	return executeCommand(command, args, false)
+	return executeCommand(command, args)
 }

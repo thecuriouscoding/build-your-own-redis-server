@@ -9,9 +9,6 @@ const port = ":6379"
 
 func main() {
 	addBasicHandlers()
-	addListHandlers()
-	flags := getFlags()
-	handlePersistence(flags)
 	// Start a TCP listener on port 6379
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
